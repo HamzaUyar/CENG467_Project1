@@ -1,0 +1,16 @@
+Q4.a – Implementation + example output
+
+I filled both STUBs in grpo_finetune.py (reward + preprocessing) and the built‑in toy check now prints `[1.0, 1.0, …] exactly eight times before training starts, so the reward function behaves as required.
+After running the full script once, the baseline eval generations were saved to cevaplar/Qwen2-0.5B-base_OUTPUTS.json and the GRPO run saved the post-finetune generations to cevaplar/Qwen2-0.5B-GRPO-finetuned_OUTPUTS.json.
+Example question (non‑isomorphic trees with 5 vertices):
+Before GRPO (…base_OUTPUTS.json:39‑42) the model ended with “E. 5” and never printed a valid option letter, so the reward parser gave zero.
+After GRPO (…finetuned_OUTPUTS.json:42) the same prompt now ends with “Answer: C. 3”, so the parser finally sees the correct option letter.
+Why overall accuracy is still low: we only fine-tune a 0.5B model on 80 training problems with a binary reward that looks at the last 20 characters, so the policy mostly learns formatting tricks rather than deeper math skills. The short GRPO run also means very little policy improvement per question.
+Q4.b – Noticing GRPO improvements
+
+Across the 20 eval items I found six cases where the baseline completion never produced any final letter but the finetuned run now appends an explicit “Answer: [A/B/C/D]” (e.g., entries at lines 36 and 42 of …finetuned_OUTPUTS.json). Even when the reasoning is still shaky, the policy learned to satisfy the reward by copying a clean final line.
+This happens because GRPO compares eight samples per prompt and upweights the ones whose final tail matches the gold option, so the model gradually prefers completions with a parsable answer. That relative ranking signal is enough to fix formatting, even if the actual math steps stay roughly the same.
+Q4.c – Better reward idea
+
+Instead of a single “letter in the last 20 chars” check, I would parse the final sentence (Final Answer: X) and also compute a lightweight symbolic check (e.g., plug the derived numeric value back into the options). Reward = 1.0 if both the reasoning-derived value and the final letter match, 0.5 if only the letter matches, 0 otherwise.
+We could also add a penalty when the completion lacks the mandated CoMAT structure (missing step headers, missing “Final Answer:”). That would push the model to improve both reasoning quality and format, not just tack on random letters.

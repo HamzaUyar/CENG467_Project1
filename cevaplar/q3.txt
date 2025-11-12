@@ -1,0 +1,23 @@
+Q3.a — Example question where Qwen2 missed but Qwen3 succeeded
+
+I used the Q2.b (Qwen2‑1.5B, temp 0.1, 2k tokens) and Q2.g (Qwen3‑1.7B, 4k tokens) runs as baselines (cevaplar/q2b.txt (line 1), cevaplar/q2b.txt (line 3), cevaplar/q2g.txt (line 7), cevaplar/q2g.txt (line 9)).
+The shared math item is “Let T: R² → R² … T(2,1)=?” (cevaplar/comat_qwen2_temp0.1_v1/comat_qwen2.json (line 3)).
+CoMAT (Qwen2, failing trace) — steps emitted in that run (…/comat_qwen2.json (line 10)):
+Recalls the definition of a linear transformation.
+States the two given image pairs.
+Treats each component separately and (incorrectly) infers scalar equalities such as “T(1)=2” and “T(2)=3/−3”.
+Claims linearity implies T(2,1) = T(2) + T(1) = 3, then maps that scalar to option C = (3,2).
+CoMAT (Qwen3, successful trace) — same question solved from the Q2.g run (cevaplar/comat_qwen3_mt4000/comat_qwen3.json (line 10)):
+Sets up a 2×2 matrix with unknowns a,b,c,d.
+Builds the four equations coming from T(1,2) and T(−1,2).
+Solves the linear system to get a=0, b=1, c=3, d=0.
+Applies the matrix to (2,1) to obtain (1,6) and selects option A (correct value).
+Q3.b — Where the failure happens
+
+The Qwen2 trace confuses coordinate-vs-vector reasoning: after listing the mapped points, it assumes the coordinates themselves define scalar outputs (“T(1)=2”, “T(2)=3”), even though T acts on 2D vectors (cevaplar/comat_qwen2_temp0.1_v1/comat_qwen2.json (line 10)).
+Because of that misinterpretation, Step 4 combines unrelated scalars (T(2)+T(1)) to approximate T(2,1), never solving for the actual transformation matrix; the chain of logic collapses when it converts the scalar 3 into the option (3,2).
+In contrast, the Qwen3 trace explicitly solves the matrix equations before evaluating the target vector, which prevents the dimension error.
+Q3.c — Suggested extra step to avoid this pattern
+
+I would add a new step between “Question Formalization” and “Solution Sketch” that I’d call “Linear System Construction & Verification”: force the model to write the unknown matrix (or linear operator parameters), solve the system induced by the provided mappings, and re-check each original mapping before touching the asked point.
+This explicit algebraic checkpoint would catch contradictory statements like “T(2)=3 and T(2)=−3” and ensure the model is working with vector equations rather than scalar shortcuts, reducing the kind of dimensional confusion that broke the Qwen2 reasoning here.

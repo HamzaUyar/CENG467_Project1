@@ -1,0 +1,17 @@
+Q1.e. (5 points) Following Q1.b, do you think additional formalization steps could improve the 
+process? Provide an example of such a step to support your argument. Alternatively, you may 
+argue that no further formalization steps are necessary and that the current sequence is complete. 
+A strong answer should include specific examples and justification to support your answer. Note 
+that there is no right or wrong answer; the goal is to thoughtfully explain your opinions.
+
+
+
+Position: One extra step improves robustness.
+
+Proposed step: Feasibility & Units Check (before solving)
+
+Ensure consistent units and valid ranges (0 ≤ eA, eB ≤ 1).
+Enforce bounds: 0 ≤ a, b and a + b = C.
+Quick feasibility: E ∈ [min(peA, eB)·C, max(eA, eB)·C].
+MQ1 example: E is between 0.12·C and 0.16·C → feasible.
+Why: Catches reading/unit mistakes early with minimal overhead; then proceed to the existing four steps.

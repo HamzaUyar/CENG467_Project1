@@ -1,0 +1,17 @@
+Q1.d. (5 points) Explain how the structured approach in Q1.b and Q1.c helped you arrive at an 
+answer more mechanically, and critically assess whether it made reaching a solution easier. 
+Discuss both the advantages and limitations of this approach, reflecting on its effectiveness in 
+guiding your reasoning process. Note that there is no right or wrong answer; the goal is to 
+thoughtfully evaluate the process. 
+ 
+The structured pipeline forced me to define variables, constants, and constraints before touching algebra. That made the solution mechanical: once a and b were defined and the balance/ capacity rules were written, the equation for a followed almost automatically.
+Separating modeling from options prevented “answer-shape” bias. I derived a numerically justified a first, then mapped to a choice, which reduced second‑guessing.
+Listing facts (C, p_A, p_B, E) up front minimized bookkeeping errors and made it easy to check units and feasibility (0 ≤ a ≤ C).
+The approach was easier in the sense that each step had a clear purpose and a quick correctness check; debugging was also simpler because mistakes were localized (definition vs. rule vs. arithmetic).
+Limitations:
+
+Overhead: for an easy mixture problem, writing four formal steps is slower than a quick mental setup.
+Fragility: if an early definition (e.g., ethanol fractions) is wrong, the structure carries that error cleanly but relentlessly to the end.
+It can suppress useful intuition/shortcuts; sometimes a direct proportionality argument is faster.
+Not all problems are crisply formalizable; ambiguous texts may still require judgment beyond the template.
+Overall, it did make the solution more systematic and reliable, especially for reproducibility and later auditing. For simple problems, it adds time; for harder or longer problems, the clarity and error control outweigh the overhead.

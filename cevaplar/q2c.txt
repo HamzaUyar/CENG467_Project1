@@ -1,0 +1,7 @@
+Configuration: Qwen2‑1.5B, temperature=0.7, max_new_tokens=2000, method=comat.
+Evaluated items: 99 “ok”.
+Official accuracy: 23/99 = 23.23%.
+Unparsable outputs: 21 cases with final_answer = −1.
+Manual parsing: I extracted a letter for all 21; 7 were correct.
+Adjusted accuracy: (23 + 7)/99 = 30/99 = 30.30%.
+Note: Higher temperature increased diversity but also verbosity/format drift, causing more unparsable endings than at 0.1. With manual recovery, accuracy improved noticeably over the 0.1 run.

@@ -1,0 +1,12 @@
+Model size/capability: I used Qwen2‑1.5B. CoMAT’s best results are typically with larger, stronger LLMs; small models struggle on college‑level math.
+Prompt fidelity: I used a single instruction without few‑shot exemplars or strict output schema. The model often drifted and buried the letter.
+Decoding/settings: Temp and long max_new_tokens increased verbosity and format drift. No stop sequence or strong “Final Answer: X” enforcement hurt parsing.
+Metric artifact: The regex missed many valid letters; after manual extraction, accuracy rose (e.g., 22.22% → 25.25%, 23.23% → 30.30%). So part of the “underperformance” is measurement.
+Task difficulty: MMLU college math is tough for small LLMs; several items require algebraic manipulation or precise definitions that these models fail to execute reliably.
+Single‑sample variance: One completion per question is brittle. Self‑consistency (vote over multiple samples) would likely help.
+Improvements I’d try next
+
+Enforce format: end with exactly “Final Answer: [A|B|C|D]” and add a stop sequence; keep max_new_tokens moderate (e.g., 512–1000).
+Use few‑shot CoMAT examples and a tighter system prompt.
+Switch to Qwen3 or a math‑leaning model; or do self‑consistency (n=5) with majority‑vote on the letter.
+Evaluate with a more robust parser to avoid false “−1” cases.

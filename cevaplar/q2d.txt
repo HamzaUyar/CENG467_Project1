@@ -1,0 +1,12 @@
+Results I observed:
+temp=0.1 → 22/99 = 22.22% (official), 25/99 = 25.25% (after manual parse).
+temp=0.7 → 23/99 = 23.23% (official), 30/99 = 30.30% (after manual parse).
+Temperature effect (intuition):
+Higher temperature flattens the next‑token distribution, so sampling explores more alternatives instead of sticking to the top‑1 path.
+This sometimes escapes a deterministic but wrong reasoning mode and yields better answers.
+It also increases verbosity/format drift; I saw more unparsable endings at 0.7 (21 vs 11), which hurts the strict regex metric.
+Net take:
+With strict parsing, accuracy rises only slightly at 0.7.
+With manual recovery of letters, the benefit is clearer, suggesting exploration helped but formatting degraded.
+Conclusion:
+Temperature trades determinism for diversity. For CoMAT, moderate diversity can improve correctness, but only if the output format remains controlled.

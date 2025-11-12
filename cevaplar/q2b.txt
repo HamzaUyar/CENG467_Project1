@@ -1,0 +1,6 @@
+Config: Qwen2‑1.5B, temp=0.1, max_new_tokens=2000
+Evaluated: 99 “ok” items
+Accuracy (code/log): 22/99 = 22.22%
+Accuracy (after your manual corrections): 25/99 = 25.25%
+Manually confirmed extra corrects: indices 34, 44, 80
+Report line (simple): “Under temp=0.1, Qwen2‑1.5B achieves 22.22% (official). After manual correction for parsing misses (indices 34, 44, 80), accuracy is 25.25%.”

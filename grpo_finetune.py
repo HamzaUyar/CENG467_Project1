@@ -1,4 +1,5 @@
 import re
+import ast
 import pandas as pd
 from datasets import Dataset
 from CoMAT_Instruction import INSTRUCTION
@@ -40,7 +41,30 @@ def reward_function(prompts: list, completions: list, question : list, correct_a
     ### STUB: INSERT THE CODE HERE ###
     ######################################
 
-    raise NotImplementedError("Reward function for GRPO algorithm. It can handle multiple completions per question and rewards them comperatively. By default, it is n=8 repetitions.")
+    option_to_idx = {"A": 0, "B": 1, "C": 2, "D": 3}
+
+    def normalize_correct_answer(val):
+        if isinstance(val, (int, float)):
+            return int(val)
+        if isinstance(val, str):
+            stripped = val.strip().upper()
+            if stripped.isdigit():
+                return int(stripped)
+            return option_to_idx.get(stripped)
+        return None
+
+    corr_values = [normalize_correct_answer(ans) for ans in correct_answer]
+    if len(corr_values) == 1 and len(completions) > 1:
+        corr_values = corr_values * len(completions)
+
+    rewards = []
+    for comp, corr in zip(completions, corr_values):
+        text_comp = comp if isinstance(comp, str) else str(comp)
+        chosen = extract_chosen_option(text_comp.strip())
+        chosen_idx = option_to_idx.get(chosen) if chosen else None
+        reward = 1.0 if (chosen_idx is not None and corr is not None and chosen_idx == corr) else 0.0
+        rewards.append(reward)
+    return rewards
 
 
 # ------------------------------------------------ EXAMPLE SCENARIO for reward function ------------------------------------------------
@@ -82,11 +106,49 @@ print(dataset, "\n")
 
 # Preprocess the dataset to create 'prompt' and 'correct_answer' fields as seen in the above example.
 def preprocess_function(examples):
-    ######################################
-    ### STUB: INSERT THE CODE HERE ###
-    ######################################
-    
-    raise NotImplementedError("Preprocess the dataset to create 'prompt' and 'correct_answer' fields.")
+    questions = examples["question"]
+    choices_raw = examples["choices"]
+    answers = examples["answer"]
+
+    prompts = []
+    formatted_choices = []
+    correct_answers = []
+    raw_questions = []
+
+    for question, choice_entry, ans in zip(questions, choices_raw, answers):
+        if isinstance(choice_entry, str):
+            try:
+                options = ast.literal_eval(choice_entry)
+            except (SyntaxError, ValueError):
+                cleaned = choice_entry.strip().strip('[]')
+                options = [opt.strip().strip("\"'") for opt in cleaned.split(',') if opt]
+        elif isinstance(choice_entry, (list, tuple)):
+            options = list(choice_entry)
+        else:
+            options = [str(choice_entry)]
+
+        option_lines = []
+        for idx, opt in enumerate(options):
+            letter = chr(ord('A') + idx)
+            option_lines.append(f"{letter}. {opt}")
+        formatted_option_text = "\n".join(option_lines)
+
+        prompt = (
+            f"{INSTRUCTION}\n\n-----------\n\nQuestion: {question}\n\nOptions:\n{formatted_option_text}"
+        )
+
+        prompts.append(prompt)
+        formatted_choices.append(formatted_option_text)
+        raw_questions.append(question)
+        correct_answers.append(int(ans) if ans is not None else -1)
+
+    return {
+        "prompt": prompts,
+        "question": prompts,
+        "raw_question": raw_questions,
+        "choices": formatted_choices,
+        "correct_answer": correct_answers,
+    }
 
 
 dataset = dataset.map(preprocess_function, batched=True, remove_columns=['answer'])
@@ -104,7 +166,7 @@ def generate_and_save(model_to_run, examples, out_dir, out_name, max_new_tokens=
     os.makedirs(out_dir, exist_ok=True)
     outputs = []
     model_to_run.eval()
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = next(model_to_run.parameters()).device
     total = len(examples) if hasattr(examples, "__len__") else None
     with torch.no_grad():
         for ex in tqdm(examples, desc="Generating outputs", total=total, unit="ex"):
@@ -142,8 +204,15 @@ print(f"Eval dataset size: {len(eval_dataset)} \n")
 training_args = GRPOConfig(output_dir="Qwen2-0.5B-GRPO")
 
 # Load model and tokenizer
+if torch.cuda.is_available():
+    device = "cuda"
+elif getattr(torch.backends, 'mps', None) and torch.backends.mps.is_available():
+    device = "mps"
+else:
+    device = "cpu"
+
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2-0.5B-Instruct")
-model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2-0.5B-Instruct").to("cuda")
+model = AutoModelForCausalLM.from_pretrained("Qwen/Qwen2-0.5B-Instruct").to(device)
 
 # Save base model outputs (before GRPO training)
 base_out_dir = "./Qwen2-0.5B-GRPO"

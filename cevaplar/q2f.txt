@@ -1,0 +1,22 @@
+Explain what you 
+observed during the experiment. How long did the code run for compared to QWEN2 and 
+what results did it achieve? Explain what the reasons behind the difference in results can be.
+
+
+Evaluation of QWEN3 Experiment
+
+The experiment log initially reported a Final Accuracy of 36.36%. Based on 99 total questions, this means the model was credited with 36 correct answers.
+
+However, my manual review of the 43 mis-parsed (final_answer = -1) questions revealed 33 additional correct answers that were present in the reasoning block but were not extracted.
+
+By adding these 33 newly verified answers to the initial 36, the new total of correct answers is 69. This raises the actual reasoning accuracy of the QWEN3 model to 69.7% (69/99).
+
+Runtime and Analysis
+
+Runtime: QWEN3 ran for approximately 1.5 hours on an A100 GPU, matching QWEN2's 1.5-hour time on a T4 GPU.
+
+My Analysis of the Discrepancy:
+
+Hardware vs. Complexity: The fact that QWEN3 requires a high-performance A100 GPU to match the runtime of QWEN2 on a lower-tier T4 indicates QWEN3 is a significantly larger and more computationally intensive model.
+
+Failure Mode: The initial 36.36% accuracy was not a measure of reasoning failure, but a failure of answer extraction. The model correctly reasoned the answer in 69.7% of cases, but its complexity seems to interfere with its ability to follow the simple formatting instruction, causing it to default to -1.

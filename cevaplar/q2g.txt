@@ -1,0 +1,35 @@
+Q2.g. (5 points) Repeat the experiment from Q2.f, but increase the max_token_limit to 4000. 
+Observe the results similar to before. Is there any change in the results and what could be their 
+cause?
+
+
+
+Evaluation of Q2.g (4k Token Limit)
+
+The automated log file for the 4000-token experiment reported a Final Accuracy of 69.70% (69/99).
+
+As requested, I manually reviewed the 15 instances where the final_answer was mis-parsed as -1. My review confirmed that 10 of these 15 had the correct solution within their reasoning steps.
+
+When adding these 10 manually verified answers to the 69 correct answers from the log, the actual reasoning accuracy for this 4k experiment increases to 79.8% (79/99).
+
+The runtime for this experiment was 3 hours on an A100 GPU.
+
+Comparison to 2k Token Experiment
+
+Runtime: The runtime doubled, increasing from 1.5 hours (2k) to 3 hours (4k).
+
+Accuracy (Reported): The reported accuracy saw a major improvement, rising from 36.36% (Q2.f) to 69.70% (Q2.g).
+
+Accuracy (Actual): The actual reasoning accuracy also improved, increasing from 69.7% (69/99 for Q2.f) to 79.8% (79/99 for Q2.g).
+
+Formatting Errors: The model's ability to follow instructions improved dramatically. Mis-parsed (-1) answers dropped from 43 in the 2k experiment to just 15 in this 4k experiment.
+
+Analysis of Causes
+
+Runtime: Doubling the max_token_limit to 4000 allowed the model to generate significantly more text for its reasoning process. This increased the computational load for each of the 99 questions, which is the direct cause of the runtime doubling from 1.5 to 3 hours.
+
+Accuracy and Formatting: The larger 4k token limit provided the model with much more "thinking space." This seems to be the key factor for the improved results:
+
+It allowed the model to perform more complex reasoning, leading to a higher actual accuracy (79.8% vs 69.7%).
+
+More importantly, it dramatically improved the model's ability to adhere to the final answer extraction format. This is why the number of mis-parsed errors fell from 43 to 15, causing the reported accuracy  to jump from 36.36% to 69.70%.

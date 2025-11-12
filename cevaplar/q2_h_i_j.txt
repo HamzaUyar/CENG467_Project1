@@ -1,0 +1,13 @@
+Q2.h — Shapley Values (evaluation_with_steps.csv)
+
+Running python3 shapley_value_evaluation.py inside CENG467_Project1 yields:
+s1 = 0.0363, s2 = 0.0407, s3 = 0.0324, s4 = 0.0192.
+Interpretation: on this toy dataset, Step 2 contributes the most marginal accuracy on average; Step 4 is the weakest when averaged over all coalitions. (Values already account for negative/positive Δ via the permutation averaging in compute_marginal_contributions.)
+Q2.i — Highest Shapley Value
+
+Step 2 has the highest Shapley score (≈0.0407).
+Likely reason: Step 2’s outputs consistently unlock downstream reasoning. Whenever Step 2 is present, the later steps receive cleaner inputs, so most permutations benefit noticeably when Step 2 joins the coalition, boosting its marginal contribution.
+Q2.j — Dependence Insight (per Appendix D observation)
+
+If removing Steps 1 + 2 hurts accuracy less than removing Step 1 alone, Step 1’s usefulness must depend on Step 2: Step 1 without Step 2 can inject noisy or partial reasoning that later stages cannot fix, so performance drops sharply. Once Step 2 is also removed, the pipeline re-routes (or skips both early stages) and avoids that mismatch, yielding a smaller net drop.
+Conclusion: Steps 1 and 2 are complementary; they should either appear together (so Step 2 refines Step 1’s outputs) or both be omitted to prevent half-finished reasoning from harming downstream steps.
